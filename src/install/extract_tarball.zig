@@ -1,4 +1,4 @@
-const bun = @import("bun");
+const bun = @import("root").bun;
 const default_allocator = bun.default_allocator;
 const Global = bun.Global;
 const json_parser = bun.JSON;
@@ -259,7 +259,7 @@ fn extract(this: *const ExtractTarball, tgz_bytes: []const u8) !Install.ExtractD
                         extract_destination,
                         null,
                         void,
-                        void{},
+                        {},
                         // for npm packages, the root dir is always "package"
                         1,
                         true,
@@ -271,7 +271,7 @@ fn extract(this: *const ExtractTarball, tgz_bytes: []const u8) !Install.ExtractD
                         extract_destination,
                         null,
                         void,
-                        void{},
+                        {},
                         // for npm packages, the root dir is always "package"
                         1,
                         true,

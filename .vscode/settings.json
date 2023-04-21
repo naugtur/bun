@@ -7,10 +7,7 @@
   "search.followSymlinks": false,
   "search.useIgnoreFiles": true,
   "zig.buildOnSave": false,
-  "zig.buildArgs": [
-    "obj",
-    "-Dfor-editor"
-  ],
+  "zig.buildArgs": ["obj", "-Dfor-editor"],
   "zig.buildOption": "build",
   "zig.buildFilePath": "${workspaceFolder}/build.zig",
   "[zig]": {
@@ -27,6 +24,8 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
+  "zig.zls.enableInlayHints": false,
+
   "[jsx]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
@@ -213,4 +212,6 @@
     "packages/bun-types"
   ],
   "files.insertFinalNewline": true
+  "typescript.tsdk": "node_modules/typescript/lib"
+
 }

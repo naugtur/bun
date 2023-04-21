@@ -1,5 +1,5 @@
 const std = @import("std");
-const bun = @import("bun");
+const bun = @import("root").bun;
 const string = bun.string;
 const Output = bun.Output;
 const Global = bun.Global;
@@ -860,7 +860,7 @@ pub const FileSystem = struct {
         threadlocal var temp_entries_option: EntriesOption = undefined;
 
         pub fn readDirectory(fs: *RealFS, _dir: string, _handle: ?std.fs.Dir) !*EntriesOption {
-            return readDirectoryWithIterator(fs, _dir, _handle, void, void{});
+            return readDirectoryWithIterator(fs, _dir, _handle, void, {});
         }
 
         pub fn readDirectoryWithIterator(fs: *RealFS, _dir: string, _handle: ?std.fs.Dir, comptime Iterator: type, iterator: Iterator) !*EntriesOption {
@@ -1092,6 +1092,25 @@ pub const PathName = struct {
     ext: string,
     filename: string,
 
+    pub fn nonUniqueNameStringBase(self: *const PathName) string {
+        // /bar/foo/index.js -> foo
+        if (self.dir.len > 0 and strings.eqlComptime(self.base, "index")) {
+            // "/index" -> "index"
+            return Fs.PathName.init(self.dir).base;
+        }
+
+        if (comptime Environment.allow_assert) {
+            std.debug.assert(!strings.includes(self.base, "/"));
+        }
+
+        // /bar/foo.js -> foo
+        return self.base;
+    }
+
+    pub fn fmtIdentifier(self: *const PathName) strings.FormatValidIdentifier {
+        return strings.fmtIdentifier(self.nonUniqueNameStringBase());
+    }
+
     // For readability, the names of certain automatically-generated symbols are
     // derived from the file name. For example, instead of the CommonJS wrapper for
     // a file being called something like "require273" it can be called something
@@ -1104,13 +1123,7 @@ pub const PathName = struct {
     // through the renaming logic that all other symbols go through to avoid name
     // collisions.
     pub fn nonUniqueNameString(self: *const PathName, allocator: std.mem.Allocator) !string {
-        if (strings.eqlComptime(self.base, "index")) {
-            if (self.dir.len > 0) {
-                return MutableString.ensureValidIdentifier(PathName.init(self.dir).base, allocator);
-            }
-        }
-
-        return MutableString.ensureValidIdentifier(self.base, allocator);
+        return MutableString.ensureValidIdentifier(self.nonUniqueNameStringBase(), allocator);
     }
 
     pub inline fn dirWithTrailingSlash(this: *const PathName) string {
@@ -1179,6 +1192,33 @@ pub const Path = struct {
     name: PathName,
     is_disabled: bool = false,
     is_symlink: bool = false,
+
+    pub fn packageName(this: *const Path) ?string {
+        var name_to_use = this.pretty;
+        if (strings.lastIndexOf(this.text, std.fs.path.sep_str ++ "node_modules" ++ std.fs.path.sep_str)) |node_modules| {
+            name_to_use = this.text[node_modules + 14 ..];
+        }
+
+        const pkgname = bun.options.JSX.Pragma.parsePackageName(name_to_use);
+        if (pkgname.len == 0 or !std.ascii.isAlphanumeric(pkgname[0]))
+            return null;
+
+        return pkgname;
+    }
+
+    pub fn loader(this: *const Path, loaders: *const bun.options.Loader.HashTable) ?bun.options.Loader {
+        if (this.isDataURL()) {
+            return bun.options.Loader.dataurl;
+        }
+
+        const ext = this.name.ext;
+
+        return loaders.get(ext) orelse bun.options.Loader.fromString(ext);
+    }
+
+    pub fn isDataURL(this: *const Path) bool {
+        return strings.eqlComptime(this.namespace, "dataurl");
+    }
 
     pub fn isBun(this: *const Path) bool {
         return strings.eqlComptime(this.namespace, "bun");
@@ -1258,7 +1298,7 @@ pub const Path = struct {
                 var buf = try allocator.alloc(u8, this.text.len + this.pretty.len + 2);
                 bun.copy(u8, buf, this.text);
                 buf.ptr[this.text.len] = 0;
-                var new_pretty = buf[this.text.len + 1 ..];
+                var new_pretty = buf[this.text.len + 1 ..][0..this.pretty.len];
                 bun.copy(u8, buf[this.text.len + 1 ..], this.pretty);
                 var new_path = Fs.Path.init(buf[0..this.text.len]);
                 buf.ptr[buf.len - 1] = 0;

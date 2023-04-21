@@ -37,13 +37,10 @@
 #include "ProcessObjectInternalsBuiltins.h"
 
 #include "WebCoreJSClientData.h"
-#include <JavaScriptCore/HeapInlines.h>
 #include <JavaScriptCore/IdentifierInlines.h>
 #include <JavaScriptCore/ImplementationVisibility.h>
 #include <JavaScriptCore/Intrinsic.h>
-#include <JavaScriptCore/JSCJSValueInlines.h>
-#include <JavaScriptCore/JSCellInlines.h>
-#include <JavaScriptCore/StructureInlines.h>
+#include <JavaScriptCore/JSObjectInlines.h>
 #include <JavaScriptCore/VM.h>
 
 namespace WebCore {
@@ -51,7 +48,7 @@ namespace WebCore {
 const JSC::ConstructAbility s_processObjectInternalsBindingCodeConstructAbility = JSC::ConstructAbility::CannotConstruct;
 const JSC::ConstructorKind s_processObjectInternalsBindingCodeConstructorKind = JSC::ConstructorKind::None;
 const JSC::ImplementationVisibility s_processObjectInternalsBindingCodeImplementationVisibility = JSC::ImplementationVisibility::Public;
-const int s_processObjectInternalsBindingCodeLength = 688;
+const int s_processObjectInternalsBindingCodeLength = 709;
 static const JSC::Intrinsic s_processObjectInternalsBindingCodeIntrinsic = JSC::NoIntrinsic;
 const char* const s_processObjectInternalsBindingCode =
     "(function (bindingName) {\n" \
@@ -64,6 +61,9 @@ const char* const s_processObjectInternalsBindingCode =
     "  var cache = globalThis.Symbol.for(\"process.bindings.constants\");\n" \
     "  var constants = globalThis[cache];\n" \
     "  if (!constants) {\n" \
+    "    //\n" \
+    "    //\n" \
+    "    //\n" \
     "    const {constants: fs} = globalThis[globalThis.Symbol.for(\"Bun.lazy\")](\n" \
     "      \"createImportMeta\",\n" \
     "      \"node:process\"\n" \
