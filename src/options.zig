@@ -1062,6 +1062,18 @@ pub const JSX = struct {
     };
 
     pub const Runtime = api.Api.JsxRuntime;
+
+    pub fn resolveRuntime(str: string) !JSX.Runtime {
+        if (strings.eqlComptime(str, "automatic")) {
+            return JSX.Runtime.automatic;
+        } else if (strings.eqlComptime(str, "fallback") or strings.eqlComptime(str, "classic")) {
+            return JSX.Runtime.classic;
+        } else if (strings.eqlComptime(str, "solid")) {
+            return JSX.Runtime.solid;
+        } else {
+            return error.InvalidJSXRuntime;
+        }
+    }
 };
 
 const TypeScript = struct {

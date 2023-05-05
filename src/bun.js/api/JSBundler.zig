@@ -198,6 +198,37 @@ pub const JSBundler = struct {
                 }
             }
 
+            if (config.getTruthy(globalThis, "jsx")) |jsx| {
+                if (jsx.isString()) {
+                    const runtime = jsx.getZigString(globalThis);
+                    if (runtime.eqlComptime("preserve")) {
+                        globalThis.throwInvalidArguments("JSX Preserve not implemented.", .{});
+                        return error.JSException;
+                    }
+                    // stuck at: `runtime` is a ZigString and not a string.
+                    // i wanted to reuse the logic but i dont think this is gonna work nicely
+                    this.jsx.runtime = try options.JSX.resolveRuntime(runtime) orelse {
+                        globalThis.throwInvalidArguments("Invalid JSX runtime: \"{s}\"", .{runtime});
+                        return error.JSException;
+                    };
+                } else if (jsx.isObject()) {
+                    if (jsx.getTruthy(globalThis, "runtime")) |runtime_value| {
+                        // shouldnt copy this logic
+                        if (runtime_value.isString()) {
+                            const runtime = runtime_value.getZigString(globalThis);
+                            if (runtime.eqlComptime("preserve")) {
+                                globalThis.throwInvalidArguments("JSX Preserve not implemented.", .{});
+                                return error.JSException;
+                            }
+                            this.jsx.runtime = try options.JSX.resolveRuntime(runtime) orelse {
+                                globalThis.throwInvalidArguments("Invalid JSX runtime: \"{s}\"", .{runtime});
+                                return error.JSException;
+                            };
+                        }
+                    }
+                }
+            }
+
             if (try config.getArray(globalThis, "plugins")) |array| {
                 var iter = array.arrayIterator(globalThis);
                 while (iter.next()) |plugin| {

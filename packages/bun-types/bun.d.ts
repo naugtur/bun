@@ -979,6 +979,18 @@ declare module "bun" {
           identifiers?: boolean;
         };
     // treeshaking?: boolean;
+    jsx?:
+      | "automatic"
+      | "classic"
+      | {
+          runtime?: "automatic" | "classic";
+          /** Only works when runtime=classic */
+          factory?: string;
+          /** Only works when runtime=classic */
+          fragment?: string;
+          /** Only works when runtime=automatic */
+          importSource?: string;
+        };
   }
 
   type BuildResult<T = Blob> = {
