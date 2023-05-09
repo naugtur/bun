@@ -2245,6 +2245,7 @@ declare var ReadableStreamDefaultController: {
 interface ReadableStreamDefaultReader<R = any>
   extends ReadableStreamGenericReader {
   read(): Promise<ReadableStreamDefaultReadResult<R>>;
+  readMany(): Promise<ReadableStreamDefaultReadValueResult<R>>;
   releaseLock(): void;
 }
 
